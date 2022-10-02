@@ -1479,6 +1479,17 @@ RegisterNetEvent('inventory:server:UseItem', function(inventory, item)
 	end
 end)
 
+--- Removes an item from the player and triggers check weapon event
+---@param src number playerId having their item removed
+---@param name string name of the item
+---@param amount integer amount of the item being removed
+---@param slot integer slot the item being removed is in
+local function RemoveItemAndCheckWeapon(src, name, amount, slot)
+	if RemoveItem(src, name, amount, slot) then
+		TriggerClientEvent("inventory:client:CheckWeapon", src, name)
+	end
+end
+
 RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
@@ -1495,8 +1506,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 		if fromItemData and fromItemData.amount >= fromAmount then
 			if toInventory == "player" or toInventory == "hotbar" then
 				local toItemData = GetItemBySlot(src, toSlot)
-				RemoveItem(src, fromItemData.name, fromAmount, fromSlot)
-				TriggerClientEvent("inventory:client:CheckWeapon", src, fromItemData.name)
+				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
 					--Player.PlayerData.items[fromSlot] = toItemData
@@ -1511,8 +1521,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local playerId = tonumber(QBCore.Shared.SplitStr(toInventory, "-")[2])
 				local OtherPlayer = QBCore.Functions.GetPlayer(playerId)
 				local toItemData = OtherPlayer.PlayerData.items[toSlot]
-				RemoveItem(src, fromItemData.name, fromAmount, fromSlot)
-				TriggerClientEvent("inventory:client:CheckWeapon", src, fromItemData.name)
+				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
 					--Player.PlayerData.items[fromSlot] = toItemData
@@ -1532,8 +1541,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			elseif QBCore.Shared.SplitStr(toInventory, "-")[1] == "trunk" then
 				local plate = QBCore.Shared.SplitStr(toInventory, "-")[2]
 				local toItemData = Trunks[plate].items[toSlot]
-				RemoveItem(src, fromItemData.name, fromAmount, fromSlot)
-				TriggerClientEvent("inventory:client:CheckWeapon", src, fromItemData.name)
+				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
 					--Player.PlayerData.items[fromSlot] = toItemData
@@ -1553,8 +1561,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			elseif QBCore.Shared.SplitStr(toInventory, "-")[1] == "glovebox" then
 				local plate = QBCore.Shared.SplitStr(toInventory, "-")[2]
 				local toItemData = Gloveboxes[plate].items[toSlot]
-				RemoveItem(src, fromItemData.name, fromAmount, fromSlot)
-				TriggerClientEvent("inventory:client:CheckWeapon", src, fromItemData.name)
+				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
 					--Player.PlayerData.items[fromSlot] = toItemData
@@ -1574,8 +1581,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			elseif QBCore.Shared.SplitStr(toInventory, "-")[1] == "stash" then
 				local stashId = QBCore.Shared.SplitStr(toInventory, "-")[2]
 				local toItemData = Stashes[stashId].items[toSlot]
-				RemoveItem(src, fromItemData.name, fromAmount, fromSlot)
-				TriggerClientEvent("inventory:client:CheckWeapon", src, fromItemData.name)
+				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
 					--Player.PlayerData.items[fromSlot] = toItemData
@@ -1599,8 +1605,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local toItemData = exports['qb-traphouse']:GetInventoryData(traphouseId, toSlot)
 				local IsItemValid = exports['qb-traphouse']:CanItemBeSaled(fromItemData.name:lower())
 				if IsItemValid then
-					RemoveItem(src, fromItemData.name, fromAmount, fromSlot)
-					TriggerClientEvent("inventory:client:CheckWeapon", src, fromItemData.name)
+					RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 					if toItemData  then
 						local itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 						toAmount = tonumber(toAmount) or toItemData.amount
@@ -1625,8 +1630,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 					CreateNewDrop(src, fromSlot, toSlot, fromAmount)
 				else
 					local toItemData = Drops[toInventory].items[toSlot]
-					RemoveItem(src, fromItemData.name, fromAmount, fromSlot)
-					TriggerClientEvent("inventory:client:CheckWeapon", src, fromItemData.name)
+					RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 					if toItemData then
 						local itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 						toAmount = tonumber(toAmount) or toItemData.amount
@@ -1658,8 +1662,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			local itemInfo = QBCore.Shared.Items[fromItemData.name:lower()]
 			if toInventory == "player" or toInventory == "hotbar" then
 				local toItemData = GetItemBySlot(src, toSlot)
-				RemoveItem(playerId, itemInfo["name"], fromAmount, fromSlot)
-				TriggerClientEvent("inventory:client:CheckWeapon", OtherPlayer.PlayerData.source, fromItemData.name)
+				RemoveItemAndCheckWeapon(playerId, fromItemData.name, fromAmount, fromSlot)
 				if toItemData then
 					itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 					toAmount = tonumber(toAmount) or toItemData.amount
