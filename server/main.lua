@@ -1507,9 +1507,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			if toInventory == "player" or toInventory == "hotbar" then
 				local toItemData = GetItemBySlot(src, toSlot)
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
 						RemoveItem(src, toItemData.name, toAmount, toSlot)
@@ -1522,9 +1520,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local OtherPlayer = QBCore.Functions.GetPlayer(playerId)
 				local toItemData = OtherPlayer.PlayerData.items[toSlot]
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					local itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
@@ -1542,9 +1538,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local plate = QBCore.Shared.SplitStr(toInventory, "-")[2]
 				local toItemData = Trunks[plate].items[toSlot]
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					local itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
@@ -1562,9 +1556,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local plate = QBCore.Shared.SplitStr(toInventory, "-")[2]
 				local toItemData = Gloveboxes[plate].items[toSlot]
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					local itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
@@ -1582,13 +1574,10 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local stashId = QBCore.Shared.SplitStr(toInventory, "-")[2]
 				local toItemData = Stashes[stashId].items[toSlot]
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					local itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
-						--RemoveFromStash(stashId, fromSlot, itemInfo["name"], toAmount)
 						RemoveFromStash(stashId, toSlot, itemInfo["name"], toAmount)
 						AddItem(src, toItemData.name, toAmount, fromSlot, toItemData.info)
 						TriggerEvent("qb-log:server:CreateLog", "stash", "Swapped Item", "orange", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | id: *"..src.."*) swapped item; name: **"..itemInfo["name"].."**, amount: **" .. toAmount .. "** with name: **" .. fromItemData.name .. "**, amount: **" .. fromAmount .. "** - stash: *" .. stashId .. "*")
@@ -1678,9 +1667,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			else
 				local toItemData = OtherPlayer.PlayerData.items[toSlot]
 				RemoveItem(playerId, itemInfo["name"], fromAmount, fromSlot)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
 						itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
@@ -1720,9 +1707,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			else
 				local toItemData = Trunks[plate].items[toSlot]
 				RemoveFromTrunk(plate, fromSlot, itemInfo["name"], fromAmount)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
 						itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
@@ -1762,9 +1747,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			else
 				local toItemData = Gloveboxes[plate].items[toSlot]
 				RemoveFromGlovebox(plate, fromSlot, itemInfo["name"], fromAmount)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
 						itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
@@ -1805,9 +1788,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 			else
 				local toItemData = Stashes[stashId].items[toSlot]
 				RemoveFromStash(stashId, fromSlot, itemInfo["name"], fromAmount)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
 						itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
@@ -1975,9 +1956,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				toInventory = tonumber(toInventory)
 				local toItemData = Drops[toInventory].items[toSlot]
 				RemoveFromDrop(fromInventory, fromSlot, itemInfo["name"], fromAmount)
-				--Player.PlayerData.items[toSlot] = fromItemData
 				if toItemData then
-					--Player.PlayerData.items[fromSlot] = toItemData
 					toAmount = tonumber(toAmount) or toItemData.amount
 					if toItemData.name ~= fromItemData.name then
 						itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
