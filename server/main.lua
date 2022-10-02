@@ -1498,14 +1498,15 @@ end
 ---@param amount integer amount of items to transfer
 ---@param srcSlot integer slot from which to remove
 ---@param destSlot integer slot to add to
----@return boolean success true if transfer occurs
+---@return integer amountTransferred amount that was transferred. 0 if nothing was transferred.
 local function TransferItem(src, dest, fromItemData, toItemData, amount, srcSlot, destSlot)
 	if toItemData.name ~= fromItemData.name then
+		amount = tonumber(amount) or toItemData.amount
 		RemoveItem(src, toItemData.name, amount, srcSlot)
 		AddItem(dest, toItemData.name, amount, destSlot, toItemData.info)
-		return true
+		return amount
 	end
-	return false
+	return 0
 end
 
 RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount)
@@ -1526,7 +1527,6 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local toItemData = GetItemBySlot(src, toSlot)
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				if toItemData then
-					toAmount = tonumber(toAmount) or toItemData.amount
 					TransferItem(src, src, fromItemData, toItemData, toAmount, toSlot, fromSlot)
 				end
 				AddItem(src, fromItemData.name, fromAmount, toSlot, fromItemData.info)
@@ -1536,9 +1536,9 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local toItemData = OtherPlayer.PlayerData.items[toSlot]
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				if toItemData then
-					toAmount = tonumber(toAmount) or toItemData.amount
-					if TransferItem(playerId, src, fromItemData, toItemData, toAmount, fromSlot, fromSlot) then
-						TriggerEvent("qb-log:server:CreateLog", "robbing", "Swapped Item", "orange", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | *"..src.."*) swapped item; name: **"..toItemData.name.."**, amount: **" .. toAmount .. "** with name: **" .. fromItemData.name .. "**, amount: **" .. fromAmount.. "** with player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | id: *"..OtherPlayer.PlayerData.source.."*)")
+					local amountTransferred = TransferItem(playerId, src, fromItemData, toItemData, toAmount, fromSlot, fromSlot)
+					if amountTransferred > 0 then
+						TriggerEvent("qb-log:server:CreateLog", "robbing", "Swapped Item", "orange", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | *"..src.."*) swapped item; name: **"..toItemData.name.."**, amount: **" .. amountTransferred .. "** with name: **" .. fromItemData.name .. "**, amount: **" .. fromAmount.. "** with player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | id: *"..OtherPlayer.PlayerData.source.."*)")
 					end
 				else
 					TriggerEvent("qb-log:server:CreateLog", "robbing", "Dropped Item", "red", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | *"..src.."*) dropped new item; name: **"..fromItemData.name.."**, amount: **" .. fromAmount .. "** to player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | id: *"..OtherPlayer.PlayerData.source.."*)")
@@ -1647,9 +1647,9 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local toItemData = GetItemBySlot(src, toSlot)
 				RemoveItemAndCheckWeapon(playerId, fromItemData.name, fromAmount, fromSlot)
 				if toItemData then
-					toAmount = tonumber(toAmount) or toItemData.amount
-					if TransferItem(src, playerId, fromItemData, toItemData, toAmount, toSlot, fromSlot) then
-						TriggerEvent("qb-log:server:CreateLog", "robbing", "Swapped Item", "orange", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | id: *"..src.."*) swapped item; name: **"..toItemData.name.."**, amount: **" .. toAmount .. "** with item; **"..toItemData.name.."**, amount: **" .. toAmount .. "** from player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | *"..OtherPlayer.PlayerData.source.."*)")
+					local amountTransferred = TransferItem(src, playerId, fromItemData, toItemData, toAmount, toSlot, fromSlot)
+					if amountTransferred > 0 then
+						TriggerEvent("qb-log:server:CreateLog", "robbing", "Swapped Item", "orange", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | id: *"..src.."*) swapped item; name: **"..toItemData.name.."**, amount: **" .. amountTransferred .. "** with item; **"..toItemData.name.."**, amount: **" .. amountTransferred .. "** from player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | *"..OtherPlayer.PlayerData.source.."*)")
 					end
 				else
 					TriggerEvent("qb-log:server:CreateLog", "robbing", "Retrieved Item", "green", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | id: *"..src.."*) took item; name: **"..fromItemData.name.."**, amount: **" .. fromAmount .. "** from player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | *"..OtherPlayer.PlayerData.source.."*)")
@@ -1659,7 +1659,6 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				local toItemData = OtherPlayer.PlayerData.items[toSlot]
 				RemoveItem(playerId, fromItemData.name, fromAmount, fromSlot)
 				if toItemData then
-					toAmount = tonumber(toAmount) or toItemData.amount
 					TransferItem(playerId, playerId, fromItemData, toItemData, toAmount, toSlot, fromSlot)
 				end
 				AddItem(playerId, fromItemData.name, fromAmount, toSlot, fromItemData.info)
