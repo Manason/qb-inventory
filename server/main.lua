@@ -1479,7 +1479,7 @@ RegisterNetEvent('inventory:server:UseItem', function(inventory, item)
 	end
 end)
 
---- Removes an item from the player and triggers check weapon event
+---Removes an item from the player and triggers check weapon event
 ---@param src number playerId having their item removed
 ---@param name string name of the item
 ---@param amount integer amount of the item being removed
@@ -1488,6 +1488,24 @@ local function RemoveItemAndCheckWeapon(src, name, amount, slot)
 	if RemoveItem(src, name, amount, slot) then
 		TriggerClientEvent("inventory:client:CheckWeapon", src, name)
 	end
+end
+
+---Removes item from the source inventory and puts in the destination inventory
+---@param src number playerId for item removal
+---@param dest number playerId for item adding
+---@param fromItemData any item data in the sender's inventory
+---@param toItemData any item data in the receivers inventory
+---@param amount integer amount of items to transfer
+---@param srcSlot integer slot from which to remove
+---@param destSlot integer slot to add to
+---@return boolean success true if transfer occurs
+local function TransferItem(src, dest, fromItemData, toItemData, amount, srcSlot, destSlot)
+	if toItemData.name ~= fromItemData.name then
+		RemoveItem(src, toItemData.name, amount, srcSlot)
+		AddItem(dest, toItemData.name, amount, destSlot, toItemData.info)
+		return true
+	end
+	return false
 end
 
 RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount)
@@ -1509,10 +1527,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				RemoveItemAndCheckWeapon(src, fromItemData.name, fromAmount, fromSlot)
 				if toItemData then
 					toAmount = tonumber(toAmount) or toItemData.amount
-					if toItemData.name ~= fromItemData.name then
-						RemoveItem(src, toItemData.name, toAmount, toSlot)
-						AddItem(src, toItemData.name, toAmount, fromSlot, toItemData.info)
-					end
+					TransferItem(src, src, fromItemData, toItemData, toAmount, toSlot, fromSlot)
 				end
 				AddItem(src, fromItemData.name, fromAmount, toSlot, fromItemData.info)
 			elseif QBCore.Shared.SplitStr(toInventory, "-")[1] == "otherplayer" then
@@ -1523,9 +1538,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				if toItemData then
 					local itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 					toAmount = tonumber(toAmount) or toItemData.amount
-					if toItemData.name ~= fromItemData.name then
-						RemoveItem(playerId, itemInfo["name"], toAmount, fromSlot)
-						AddItem(src, toItemData.name, toAmount, fromSlot, toItemData.info)
+					if TransferItem(playerId, src, fromItemData, toItemData, toAmount, fromSlot, fromSlot) then
 						TriggerEvent("qb-log:server:CreateLog", "robbing", "Swapped Item", "orange", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | *"..src.."*) swapped item; name: **"..itemInfo["name"].."**, amount: **" .. toAmount .. "** with name: **" .. fromItemData.name .. "**, amount: **" .. fromAmount.. "** with player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | id: *"..OtherPlayer.PlayerData.source.."*)")
 					end
 				else
@@ -1655,9 +1668,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				if toItemData then
 					itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
 					toAmount = tonumber(toAmount) or toItemData.amount
-					if toItemData.name ~= fromItemData.name then
-						RemoveItem(src, toItemData.name, toAmount, toSlot)
-						AddItem(playerId, itemInfo["name"], toAmount, fromSlot, toItemData.info)
+					if TransferItem(src, playerId, fromItemData, toItemData, toAmount, toSlot, fromSlot) then
 						TriggerEvent("qb-log:server:CreateLog", "robbing", "Swapped Item", "orange", "**".. GetPlayerName(src) .. "** (citizenid: *"..Player.PlayerData.citizenid.."* | id: *"..src.."*) swapped item; name: **"..toItemData.name.."**, amount: **" .. toAmount .. "** with item; **"..itemInfo["name"].."**, amount: **" .. toAmount .. "** from player: **".. GetPlayerName(OtherPlayer.PlayerData.source) .. "** (citizenid: *"..OtherPlayer.PlayerData.citizenid.."* | *"..OtherPlayer.PlayerData.source.."*)")
 					end
 				else
@@ -1669,11 +1680,7 @@ RegisterNetEvent('inventory:server:SetInventoryData', function(fromInventory, to
 				RemoveItem(playerId, itemInfo["name"], fromAmount, fromSlot)
 				if toItemData then
 					toAmount = tonumber(toAmount) or toItemData.amount
-					if toItemData.name ~= fromItemData.name then
-						itemInfo = QBCore.Shared.Items[toItemData.name:lower()]
-						RemoveItem(playerId, itemInfo["name"], toAmount, toSlot)
-						AddItem(playerId, itemInfo["name"], toAmount, fromSlot, toItemData.info)
-					end
+					TransferItem(playerId, playerId, fromItemData, toItemData, toAmount, toSlot, fromSlot)
 				end
 				itemInfo = QBCore.Shared.Items[fromItemData.name:lower()]
 				AddItem(playerId, itemInfo["name"], fromAmount, toSlot, fromItemData.info)
